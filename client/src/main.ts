@@ -54,34 +54,82 @@ API Calls
 // * Function to get parks by state
 const getParksByState = async (state: string) => {
   try {
-    //TODO: update this function to take in the name of a state and fetch all national parks in that state.  Return the resulting array of parks.
+    // Construct the API URL using the provided state name
+    const ApiUrl = `https://developer.nps.gov/api/v1/parks?stateCode=${state}&api_key=bZJKlb9vYwFybTuYtbwckTwFV7xmMhyBClHToXGG`;
+    const response = await fetch(ApiUrl, {
+      method: 'GET',
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    //TODO: update this function to take in the name of a 
+    //state and fetch all national parks in that state.  Return the resulting array of parks.
+    return data.data;
+  } catch (err) {
+    console.log('Error:', err);
+    return [];
+  }
+
+}
+//*Function to delete state from history
+const deledStateFromHistory = async (id: string) => {
+  try {
+    // Example API call to delete a state from history
+    const response = await fetch(`/api/history/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    //TODO: update this function to take in the id of a saved 
+    //state and delete that state from search history.
     console.log(
-      'complete the `getParksByState` function in cilent/src/main.ts'
+      'complete the `deleteStateFromHistory` function in cilent/src/main.ts'
     );
   } catch (err) {
     console.log('Error:', err);
-    return err;
+  }
+}
+
+
+
+// * Function to get future events by state
+//TODO: update this function to take in a state and fetch all events 
+//happening in national parks in that state. Return the resulting array of events.
+// * Function to get saved searches
+
+const getEventsByState = async (state: string) => {
+  try {
+    const eventsApiUrl = `https://developer.nps.gov/api/v1/events?stateCode=${state}&api_key=bZJKlb9vYwFybTuYtbwckTwFV7xmMhyBClHToXGG`;
+
+    const response = await fetch(eventsApiUrl);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+
+    // Return the resulting array of events
+    return data.data; // Adjust based on the actual response structure
+  } catch (err) {
+    console.log('Error:', err);
+    return []; // Return an empty array on error
   }
 };
 
-//*Function to delete state from history
-const deledStateFromHistory = async (id: string) => {
-  //TODO: update this function to take in the id of a saved state and delete that state from search history.
-  console.log(
-    'complete the `deleteStateFromHistory` function in cilent/src/main.ts'
-  );
-};
-
-// * Function to get future events by state
-
-const getEventsByState = async (state: string) => {
-  //TODO: update this function to take in a state and fetch all events happening in national parks in that state. Return the resulting array of events.
-  console.log('complete the `getEventsByState` function in cilent/src/main.ts');
-};
-// * Function to get saved searches
 
 const getHistory = async () => {
   try {
+    const response = await fetch('/api/history');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.data;
     //TODO: update this function to fetch all previously searched states. Return the resulting array of states.
     console.log('complete the `getHistory` function in cilent/src/main.ts');
   } catch (err) {
@@ -120,15 +168,16 @@ const renderHistory = async (history: State[]) => {
     if (searchHistoryContainer) {
       searchHistoryContainer.innerHTML = '';
 
-      if (!history.length) {
+      if (!history) {
         searchHistoryContainer.innerHTML =
           '<p class="col-12 text-center">No Previous Search History</p>';
-      }
+      } else {
+        // * Start at end of history array and count down to show the most recent cities at the top.
+        for (let i = history.length - 1; i >= 0; i--) {
+          const historyBtn = buildHistoryListItem(history[i]);
+          searchHistoryContainer.append(historyBtn);
+        }
 
-      // * Start at end of history array and count down to show the most recent cities at the top.
-      for (let i = history.length - 1; i >= 0; i--) {
-        const historyBtn = buildHistoryListItem(history[i]);
-        searchHistoryContainer.append(historyBtn);
       }
     }
   } catch (err) {
